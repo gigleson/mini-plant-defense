@@ -1,0 +1,350 @@
+
+:root {
+    --grass-dark: #397b35;
+    --grass-light: #91cf55;
+    --panel: #315d35;
+    --gold: #ffd447;
+    --cream: #fff3cf;
+}
+
+body {
+    background:
+        radial-gradient(circle at top, #426d3c, #172f20 75%);
+    color: #fff;
+    min-height: 100vh;
+}
+
+.header {
+    min-height: 85px;
+    padding: 15px 5%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+    background: var(--panel);
+    border-bottom: 4px solid #244829;
+    box-shadow: 0 5px 15px #0004;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.logo span {
+    font-size: 36px;
+}
+
+.logo h1 {
+    font-size: clamp(20px, 3vw, 30px);
+}
+
+.game-stats {
+    display: flex;
+    gap: 25px;
+    flex-wrap: wrap;
+}
+
+.stat {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 15px;
+}
+
+.stat strong {
+    color: var(--gold);
+    font-size: 20px;
+}
+
+
+/* =================================
+   TWO COLUMN GAME LAYOUT
+================================= */
+
+.main-container {
+    width: 95%;
+    max-width: 1000px;
+    margin: 10px auto;
+}
+
+.game-layout {
+    display: grid;
+    grid-template-columns: 240px minmax(0, 1fr);
+    gap: 25px;
+    align-items: start;
+}
+
+/* LEFT PLANT SIDEBAR */
+
+.plant-sidebar {
+    background: #e26708;
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0       , 0, 0, 0.1);
+}
+
+.sidebar-heading {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.sidebar-heading h2 {
+    margin-bottom: 5px;
+    color: #245c32;
+}
+
+.sidebar-heading p {
+    font-size: 13px;
+    color: #777;
+}
+
+/* PLANT CARDS */
+
+.plant-selection {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.plant-card {
+    width: 100%;
+    min-height: 105px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+
+    padding: 12px;
+    border: 2px solid #dce8dc;
+    border-radius: 12px;
+    background: #f7fff5;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.plant-card:hover {
+    border-color: #4caf50;
+    transform: translateY(-3px);
+}
+
+.plant-card.selected {
+    border-color: #2e9e45;
+    background: hwb(70 4% 6%);
+    box-shadow: 0 0 8px rgba(46, 158, 69, 0.25);
+}
+
+.plant-card:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.plant-icon {
+    font-size: 30px;
+}
+
+.plant-name {
+    font-weight: bold;
+    color: #254d2c;
+}
+
+.plant-cost {
+    font-size: 13px;
+    color: #777;
+}
+
+/* GAME CONTROLS */
+
+.game-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 25px;
+}
+
+.control-btn {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.control-btn:hover:not(:disabled) {
+    filter: brightness(1.1);
+    transform: translateY(-2px);
+}
+
+.control-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.start-btn {
+    background: #35a853;
+}
+
+.pause-btn {
+    background: #e6a329;
+}
+
+.reset-btn {
+    background: #dc5252;
+}
+
+/* RIGHT GAME BOARD */
+
+.board-section {
+    min-width: 0;
+    background: hwb(0 0% 96%);
+    padding: 10px;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.board-heading {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.board-heading h2 {
+    color: #245c32;
+}
+
+.board-wrapper {
+    width: 100%;
+    overflow: hidden;
+    border-radius: 10px;
+}
+
+#game-canvas {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+.game-message {
+    margin-top: 15px;
+    padding: 12px;
+    text-align: center;
+    background: hsl(70, 100%, 50%);
+    border-radius: 8px;
+    color: #285b31;
+}
+
+/* RESPONSIVE LAYOUT */
+
+@media (max-width: 800px) {
+    .game-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .plant-selection {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .game-controls {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 480px) {
+    .main-container {
+        width: 98%;
+    }
+
+    .plant-sidebar,
+    .board-section {
+        padding: 12px;
+    }
+
+    .plant-selection {
+        gap: 6px;
+    }
+
+    .plant-card {
+        padding: 8px 4px;
+    }
+
+    .plant-name {
+        font-size: 12px;
+    }
+
+    .game-controls {
+        gap: 6px;
+    }
+
+    .control-btn {
+        padding: 10px 4px;
+        font-size: 12px;
+    }
+}
+
+/* PLAYER NAME */
+
+.player-name-section {
+    margin-top: 20px;
+}
+
+.player-name-section label {
+    display: block;
+    margin-bottom: 7px;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+.player-name-section input {
+    width: 100%;
+    padding: 9px;
+    border: 2px solid #b8a36a;
+    border-radius: 7px;
+    outline: none;
+}
+
+/* LEADERBOARD */
+
+.leaderboard {
+    margin-top: 20px;
+    padding: 12px;
+    background: #203d28;
+    border: 2px solid #59764c;
+    border-radius: 10px;
+}
+
+.leaderboard h3 {
+    text-align: center;
+    color: var(--gold);
+    font-size: 16px;
+    margin-bottom: 12px;
+}
+
+.leaderboard ol {
+    padding-left: 25px;
+}
+
+.leaderboard li {
+    padding: 7px 2px;
+    border-bottom: 1px solid #ffffff22;
+    font-size: 12px;
+    color: #fff3cf;
+}
+
+.leaderboard li:last-child {
+    border-bottom: none;
+}
+
+.leaderboard .empty-leaderboard {
+    list-style: none;
+    padding-left: 0;
+    text-align: center;
+    color: #d4e5cb;
+}

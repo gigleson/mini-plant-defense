@@ -1,0 +1,155 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta name="description" content="Mini Plant Defense - A JavaScript tower defense game">
+
+    <title>Mini Plant Defense</title>
+
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/game.css">
+</head>
+
+<body>
+
+    <header class="header">
+        <div class="logo">
+            <span>🌻</span>
+            <h1>Mini Plant Defense</h1>
+        </div>
+
+        <div class="game-stats">
+            <div class="stat">
+                <span>☀️</span>
+                <span>Sunlight:</span>
+                <strong id="sun-count">150</strong>
+            </div>
+
+            <div class="stat">
+                <span>🌊</span>
+                <span>Wave:</span>
+                <strong id="wave-count">0</strong>
+            </div>
+        </div>
+    </header>
+
+    
+<main class="main-container">
+
+    <div class="game-layout">
+
+        <!-- LEFT SIDEBAR: PLANTS AND CONTROLS -->
+        <aside class="plant-sidebar">
+
+            <div class="sidebar-heading">
+                
+            </div>
+
+            <div class="plant-selection" id="plant-selection">
+
+                <button class="plant-card" data-plant="peashooter">
+                    <span class="plant-icon">🌱</span>
+                    <span class="plant-name">Peashooter</span>
+                    <span class="plant-cost">100 ☀️</span>
+                </button>
+
+                <button class="plant-card" data-plant="sunflower">
+                    <span class="plant-icon">🌻</span>
+                    <span class="plant-name">Sunflower</span>
+                    <span class="plant-cost">50 ☀️</span>
+                </button>
+
+                <button class="plant-card" data-plant="wallnut">
+                    <span class="plant-icon">🥔</span>
+                    <span class="plant-name">Wall-nut</span>
+                    <span class="plant-cost">50 ☀️</span>
+                </button>
+
+            </div>
+
+            <div class="game-controls">
+
+                <button id="start-btn" class="control-btn start-btn">
+                    ▶ Start Game
+                </button>
+
+                <button id="pause-btn" class="control-btn pause-btn" disabled>
+                    ⏸ Pause
+                </button>
+
+                <button id="reset-btn" class="control-btn reset-btn">
+                    ↻ Reset
+                </button>
+
+            </div>
+            
+            
+            
+
+        </aside>
+        
+
+        <!-- RIGHT SIDE: GAME BOARD -->
+         
+        <section class="board-section">
+            <div class="stat">
+    <span>🏆</span>
+    <span>Score:</span>
+    <strong id="score-count">0</strong>
+</div>
+
+            <div class="board-wrapper">
+                <canvas
+                    id="game-canvas"
+                    width="900"
+                    height="500"
+                    aria-label="Mini Plant Defense game board"
+                ></canvas>
+            </div>
+
+            <div class="game-message" id="game-message" role="status">
+                Welcome! Press Start Game to begin.
+            </div>
+
+        </section>
+
+</aside>
+
+<!-- PLAYER NAME -->
+<div class="player-name-section">
+    <label for="player-name">Player Name</label>
+    <input
+        type="text"
+        id="player-name"
+        placeholder="Enter your name"
+        maxlength="20"
+        value="Player"
+    >
+</div>
+
+<!-- LEADERBOARD -->
+<div class="leaderboard">
+    <h3>🏆 Leaderboard</h3>
+
+    <ol id="leaderboard-list">
+        <li>No scores yet!</li>
+    </ol>
+</div>
+
+    
+
+</main>
+
+
+    <footer>
+        <p>Mini Plant Defense</p>
+    </footer>
+
+    <script type="module" src="js/main.js"></script>
+     <!-- <script type="module" src="./js/test-plant.js"></script> -->
+
+</body>
+</html>
