@@ -1,0 +1,136 @@
+
+import { GAME_CONFIG, WAVE_CONFIG } from "../config.js";
+import { gameState } from "../gameState.js";
+import { Zombie } from "../entities/Zombie.js";
+
+export class ZombieSystem {
+    #spawnTimer: number = 0;
+
+    update(deltaTime: number): void {
+        if (!Number.isFinite(deltaTime) || deltaTime < 0) {
+            throw new Error("Invalid delta time.");
+        }
+
+        // Start the next wave when the previous one is finished.
+        if (
+            !gameState.waveActive &&
+            gameState.zombies.length === 0 &&
+            gameState.currentWave < WAVE_CONFIG.totalWaves
+        ) {
+            this.startNextWave();
+        }
+
+        if (!gameState.waveActive) return;
+
+        // Spawn zombies at the configured interval.
+        this.#spawnTimer += deltaTime;
+
+        const spawnInterval = Math.max(
+            1,
+            WAVE_CONFIG.spawnInterval /
+                (1 + (gameState.currentWave - 1) * 0.25)
+        );
+
+        if (
+            this.#spawnTimer >= spawnInterval &&
+            gameState.totalZombiesSpawned <
+                this.getZombieCountForWave()
+        ) {
+            this.#spawnTimer = 0;
+            this.spawnZombie();
+            gameState.totalZombiesSpawned++;
+        }
+
+        const cellWidth =
+            GAME_CONFIG.canvasWidth / GAME_CONFIG.columns;
+
+        // Move zombies or let them attack plants.
+        for (const zombie of gameState.zombies) {
+            const targetPlant = gameState.plants.find(plant => {
+                if (!plant.alive || plant.row !== zombie.row) {
+                    return false;
+                }
+
+                const plantLeft = plant.column * cellWidth;
+                const plantRight = plantLeft + cellWidth;
+
+                return (
+                    zombie.x < plantRight &&
+                    zombie.x + zombie.width > plantLeft
+                );
+            });
+
+            if (targetPlant) {
+                zombie.attackTimer += deltaTime;
+
+                while (
+                    zombie.attackTimer >= zombie.attackInterval &&
+                    targetPlant.alive
+                ) {
+                    zombie.attackTimer -= zombie.attackInterval;
+                    targetPlant.takeDamage(zombie.damage);
+                }
+            } else {
+                zombie.attackTimer = 0;
+                zombie.update(deltaTime);
+            }
+
+            if (zombie.x <= 0) {
+                gameState.status = "gameover";
+                break;
+            }
+        }
+
+        // Remove destroyed plants.
+        gameState.plants = gameState.plants.filter(
+            plant => plant.alive
+        );
+
+        // Check whether the wave is complete.
+        const allZombiesSpawned =
+            gameState.totalZombiesSpawned >=
+            this.getZombieCountForWave();
+
+        if (
+            allZombiesSpawned &&
+            gameState.zombies.length === 0
+        ) {
+            if (gameState.currentWave >= WAVE_CONFIG.totalWaves) {
+                gameState.status = "victory";
+            } else {
+                gameState.waveActive = false;
+            }
+        }
+    }
+
+    startNextWave(): void {
+        gameState.currentWave++;
+
+        gameState.totalZombiesSpawned = 0;
+        gameState.waveActive = true;
+
+        this.#spawnTimer = 0;
+    }
+
+    getZombieCountForWave(): number {
+        return Math.ceil(
+            WAVE_CONFIG.zombiesPerWave *
+            Math.pow(
+                WAVE_CONFIG.difficultyIncrease,
+                gameState.currentWave - 1
+            )
+        );
+    }
+
+    spawnZombie(): Zombie {
+        const randomRow = Math.floor(
+            Math.random() * GAME_CONFIG.rows
+        );
+
+        const zombie = new Zombie(randomRow);
+
+        gameState.zombies.push(zombie);
+
+        return zombie;
+    }
+}
