@@ -13,8 +13,8 @@ export class Peashooter extends Plant {
             "peashooter",
             row,
             column,
-            PLANT_CONFIG.peashooter
-        );
+            PLANT_CONFIG.peashooter 
+        );  
 
         this.damage = 20;
         this.attackInterval = 1.5;
