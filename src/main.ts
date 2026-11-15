@@ -109,8 +109,8 @@ const showMessage = (text: string): void => {
 };
 
 // Update the leaderboard display.
-function updateLeaderboard(): void {
-    const scores = leaderboardSystem.loadScores();
+async function updateLeaderboard(): Promise<void> {
+    const scores = await leaderboardSystem.loadScores();
 
     leaderboardList.innerHTML = "";
 
@@ -249,35 +249,9 @@ function gameLoop(timestamp: number): void {
             currentStatus === "victory"
         ) {
             if (!scoreSaved) {
-                const result = leaderboardSystem.saveScore(
-                    playerNameInput.value,
-                    gameState.score
-                );
-
-                scoreSaved = true;
-
-                updateLeaderboard();
-
-                const outcome =
-                    currentStatus === "victory"
-                        ? "Victory! You defended your garden!"
-                        : "Game Over! Your garden has been overrun.";
-
-                let scoreMessage = "";
-
-                if (result.isNewRecord) {
-                    scoreMessage =
-                        ` 🏆 NEW HIGH SCORE! ${gameState.score} points!`;
-                } else if (result.rank !== null) {
-                    scoreMessage =
-                        ` You achieved rank #${result.rank}!`;
-                } else {
-                    scoreMessage =
-                        ` Final score: ${gameState.score}.`;
-                }
-
-                showMessage(outcome + scoreMessage);
-            }
+    scoreSaved = true;
+    void saveCompletedGame(currentStatus);
+}
 
             updateInterface();
 
@@ -295,9 +269,45 @@ function gameLoop(timestamp: number): void {
     // Schedule the next frame.
     requestAnimationFrame(gameLoop);
 }
+async function saveCompletedGame(
+    status: GameStatus
+): Promise<void> {
+    try {
+        const result = await leaderboardSystem.saveScore(
+            playerNameInput.value,
+            gameState.score
+        );
+
+        await updateLeaderboard();
+
+        const outcome =
+            status === "victory"
+                ? "Victory! You defended your garden!"
+                : "Game Over! Your garden has been overrun.";
+
+        let scoreMessage = "";
+
+        if (result.isNewRecord) {
+            scoreMessage =
+                ` 🏆 NEW HIGH SCORE! ${gameState.score} points!`;
+        } else if (result.rank !== null) {
+            scoreMessage =
+                ` You achieved rank #${result.rank}!`;
+        } else {
+            scoreMessage =
+                ` Final score: ${gameState.score}.`;
+        }
+
+        showMessage(outcome + scoreMessage);
+
+    } catch (error) {
+        console.error("Failed to save score:", error);
+        showMessage("Could not save your score. Please try again.");
+    }
+}
 
 // Initial setup.
-updateLeaderboard();
+void updateLeaderboard();
 updateInterface();
 
 requestAnimationFrame(gameLoop);
