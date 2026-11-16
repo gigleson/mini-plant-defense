@@ -121,18 +121,62 @@
 
 <!-- PLAYER NAME -->
 <div class="player-name-section">
-    <label for="player-name">Player Name</label>
-    <input
-        type="text"
-        id="player-name"
-        placeholder="Enter your name"
-        maxlength="20"
-        value="Player"
-    >
+    <section id="auth-section">
+    <h2>Mini Plant Defense Account</h2>
+
+    <div class="auth-form">
+        <h3>Login</h3>
+
+        <input
+            type="text"
+            id="login-username"
+            placeholder="Username"
+            required
+        >
+
+        <input
+            type="password"
+            id="login-password"
+            placeholder="Password"
+            required
+        >
+
+        <button id="login-btn">Login</button>
+        <button id="logout-btn">Logout</button>
+    </div>
+
+    <hr>
+
+    <div class="auth-form">
+        <h3>Sign Up</h3>
+
+        <input
+            type="text"
+            id="register-username"
+            placeholder="Choose a username"
+            required
+        >
+
+        <input
+            type="password"
+            id="register-password"
+            placeholder="Choose a password"
+            required
+        >
+
+        <button id="register-btn">Sign Up</button>
+    </div>
+    <p id="auth-user">Not logged in</p>
+
+    
+</section>
+    
 </div>
+
 
 <!-- LEADERBOARD -->
 <div class="leaderboard">
+    <p id="auth-message"></p>
     <h3>🏆 Leaderboard</h3>
 
     <ol id="leaderboard-list">

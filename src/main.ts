@@ -10,6 +10,7 @@ import { PlantSystem } from "./systems/PlantSystem.js";
 import { ZombieSystem } from "./systems/ZombieSystem.js";
 import { ProjectileSystem } from "./systems/ProjectileSystem.js";
 import { LeaderboardSystem } from "./systems/LeaderboardSystem.js";
+import { AuthSystem } from "./systems/AuthSystem.js";
 
 // Safely retrieve HTML elements.
 function getRequiredElement<T extends HTMLElement>(id: string): T {
@@ -37,8 +38,7 @@ const waveDisplay = getRequiredElement<HTMLElement>("wave-count");
 const scoreDisplay = getRequiredElement<HTMLElement>("score-count");
 const message = getRequiredElement<HTMLElement>("game-message");
 
-const playerNameInput =
-    getRequiredElement<HTMLInputElement>("player-name");
+
 
 const leaderboardList =
     getRequiredElement<HTMLElement>("leaderboard-list");
@@ -54,9 +54,32 @@ const resetButton =
 
 const plantCards =
     document.querySelectorAll<HTMLButtonElement>(".plant-card");
+    const loginUsername =
+    getRequiredElement<HTMLInputElement>("login-username");
+
+const loginPassword =
+    getRequiredElement<HTMLInputElement>("login-password");
+
+const registerUsername =
+    getRequiredElement<HTMLInputElement>("register-username");
+
+const registerPassword =
+    getRequiredElement<HTMLInputElement>("register-password");
+
+const loginButton =
+    getRequiredElement<HTMLButtonElement>("login-btn");
+
+const registerButton =
+    getRequiredElement<HTMLButtonElement>("register-btn");
+
+const authMessage =
+    getRequiredElement<HTMLElement>("auth-message");
+const logoutButton = getRequiredElement<HTMLButtonElement>("logout-btn");
 
 // Game systems.
 const leaderboardSystem = new LeaderboardSystem();
+const authUser = getRequiredElement<HTMLElement>("auth-user");
+const authSystem = new AuthSystem();
 const game = new Game(canvas);
 const plantSystem = new PlantSystem();
 const zombieSystem = new ZombieSystem();
@@ -145,7 +168,10 @@ async function updateLeaderboard(): Promise<void> {
 // Start the game.
 function startGame(): void {
     scoreSaved = false;
-
+if (!authSystem.getToken()) {
+    showMessage("Please log in or sign up before playing.");
+    return;
+}
     if (gameState.status !== "menu") return;
 
     gameState.status = "playing";
@@ -182,6 +208,49 @@ function resetGame(): void {
 
     updateInterface();
 }
+loginButton.addEventListener("click", async () => {
+    try {
+        const result = await authSystem.login(
+            loginUsername.value,
+            loginPassword.value
+        );
+
+        authMessage.textContent =
+            `Welcome back, ${result.user.username}!`;
+        authUser.textContent = `Logged in as ${result.user.username}`;
+
+        loginPassword.value = "";
+
+    } catch (error) {
+        authMessage.textContent =
+            error instanceof Error
+                ? error.message
+                : "Login failed.";
+    }
+});
+registerButton.addEventListener("click", async () => {
+    try {
+        const result = await authSystem.register(
+            registerUsername.value,
+            registerPassword.value
+        );
+
+        authMessage.textContent =
+            `Account created! Welcome, ${result.user.username}!`;
+authUser.textContent = `Logged in as ${result.user.username}`;
+        registerPassword.value = "";
+
+    } catch (error) {
+        authMessage.textContent =
+            error instanceof Error
+                ? error.message
+                : "Registration failed.";
+    }
+});
+logoutButton.addEventListener("click", () => {
+    authSystem.logout();
+    authMessage.textContent = "You have been logged out.";
+});
 
 // Handle plant card selection.
 plantCards.forEach(card => {
@@ -273,10 +342,11 @@ async function saveCompletedGame(
     status: GameStatus
 ): Promise<void> {
     try {
-        const result = await leaderboardSystem.saveScore(
-            playerNameInput.value,
-            gameState.score
-        );
+       const result = await leaderboardSystem.saveScore(
+    '',
+    gameState.score,
+    authSystem.getToken()
+);
 
         await updateLeaderboard();
 

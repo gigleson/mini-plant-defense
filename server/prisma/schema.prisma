@@ -18,3 +18,9 @@ model Leaderboard {
 
   @@index([score])
 }
+model User {
+  id           Int      @id @default(autoincrement())
+  username     String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+}

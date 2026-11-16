@@ -28,33 +28,41 @@ export class LeaderboardSystem {
 
     // Save a new score to the database.
     async saveScore(
-        name: string,
-        score: number
-    ): Promise<SaveScoreResult> {
+    name: string,
+    score: number,
+    token: string | null
+): Promise<SaveScoreResult> {
 
-        const response = await fetch(API_URL, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                name,
-                score
-            })
-        });
-
-        if (!response.ok) {
-            throw new Error("Failed to save score.");
-        }
-
-        const result = await response.json();
-
-        return {
-            scores: result.scores as LeaderboardEntry[],
-            rank: result.rank as number | null,
-            isNewRecord: result.isNewRecord as boolean
-        };
+    if (!token) {
+        throw new Error("Please log in before saving your score.");
     }
+
+    const response = await fetch(API_URL, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({
+            name,
+            score
+        })
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+        throw new Error(
+            result.message || "Failed to save score."
+        );
+    }
+
+    return {
+        scores: result.scores as LeaderboardEntry[],
+        rank: result.rank as number | null,
+        isNewRecord: result.isNewRecord as boolean
+    };
+}
 
     // Clear all leaderboard scores.
     async clearScores(): Promise<boolean> {

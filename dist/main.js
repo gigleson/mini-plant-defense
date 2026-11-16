@@ -5,6 +5,7 @@ import { PlantSystem } from "./systems/PlantSystem.js";
 import { ZombieSystem } from "./systems/ZombieSystem.js";
 import { ProjectileSystem } from "./systems/ProjectileSystem.js";
 import { LeaderboardSystem } from "./systems/LeaderboardSystem.js";
+import { AuthSystem } from "./systems/AuthSystem.js";
 // Safely retrieve HTML elements.
 function getRequiredElement(id) {
     const element = document.getElementById(id);
@@ -24,14 +25,23 @@ const sunDisplay = getRequiredElement("sun-count");
 const waveDisplay = getRequiredElement("wave-count");
 const scoreDisplay = getRequiredElement("score-count");
 const message = getRequiredElement("game-message");
-const playerNameInput = getRequiredElement("player-name");
 const leaderboardList = getRequiredElement("leaderboard-list");
 const startButton = getRequiredElement("start-btn");
 const pauseButton = getRequiredElement("pause-btn");
 const resetButton = getRequiredElement("reset-btn");
 const plantCards = document.querySelectorAll(".plant-card");
+const loginUsername = getRequiredElement("login-username");
+const loginPassword = getRequiredElement("login-password");
+const registerUsername = getRequiredElement("register-username");
+const registerPassword = getRequiredElement("register-password");
+const loginButton = getRequiredElement("login-btn");
+const registerButton = getRequiredElement("register-btn");
+const authMessage = getRequiredElement("auth-message");
+const logoutButton = getRequiredElement("logout-btn");
 // Game systems.
 const leaderboardSystem = new LeaderboardSystem();
+const authUser = getRequiredElement("auth-user");
+const authSystem = new AuthSystem();
 const game = new Game(canvas);
 const plantSystem = new PlantSystem();
 const zombieSystem = new ZombieSystem();
@@ -97,6 +107,10 @@ async function updateLeaderboard() {
 // Start the game.
 function startGame() {
     scoreSaved = false;
+    if (!authSystem.getToken()) {
+        showMessage("Please log in or sign up before playing.");
+        return;
+    }
     if (gameState.status !== "menu")
         return;
     gameState.status = "playing";
@@ -125,6 +139,40 @@ function resetGame() {
     showMessage("Game reset. Press Start Game to begin.");
     updateInterface();
 }
+loginButton.addEventListener("click", async () => {
+    try {
+        const result = await authSystem.login(loginUsername.value, loginPassword.value);
+        authMessage.textContent =
+            `Welcome back, ${result.user.username}!`;
+        authUser.textContent = `Logged in as ${result.user.username}`;
+        loginPassword.value = "";
+    }
+    catch (error) {
+        authMessage.textContent =
+            error instanceof Error
+                ? error.message
+                : "Login failed.";
+    }
+});
+registerButton.addEventListener("click", async () => {
+    try {
+        const result = await authSystem.register(registerUsername.value, registerPassword.value);
+        authMessage.textContent =
+            `Account created! Welcome, ${result.user.username}!`;
+        authUser.textContent = `Logged in as ${result.user.username}`;
+        registerPassword.value = "";
+    }
+    catch (error) {
+        authMessage.textContent =
+            error instanceof Error
+                ? error.message
+                : "Registration failed.";
+    }
+});
+logoutButton.addEventListener("click", () => {
+    authSystem.logout();
+    authMessage.textContent = "You have been logged out.";
+});
 // Handle plant card selection.
 plantCards.forEach(card => {
     card.addEventListener("click", () => {
@@ -188,7 +236,7 @@ function gameLoop(timestamp) {
 }
 async function saveCompletedGame(status) {
     try {
-        const result = await leaderboardSystem.saveScore(playerNameInput.value, gameState.score);
+        const result = await leaderboardSystem.saveScore('', gameState.score, authSystem.getToken());
         await updateLeaderboard();
         const outcome = status === "victory"
             ? "Victory! You defended your garden!"

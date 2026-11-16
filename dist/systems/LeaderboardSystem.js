@@ -9,21 +9,25 @@ export class LeaderboardSystem {
         return await response.json();
     }
     // Save a new score to the database.
-    async saveScore(name, score) {
+    async saveScore(name, score, token) {
+        if (!token) {
+            throw new Error("Please log in before saving your score.");
+        }
         const response = await fetch(API_URL, {
             method: "POST",
             headers: {
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
             },
             body: JSON.stringify({
                 name,
                 score
             })
         });
-        if (!response.ok) {
-            throw new Error("Failed to save score.");
-        }
         const result = await response.json();
+        if (!response.ok) {
+            throw new Error(result.message || "Failed to save score.");
+        }
         return {
             scores: result.scores,
             rank: result.rank,

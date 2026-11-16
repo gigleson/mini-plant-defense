@@ -1,18 +1,21 @@
 
-import "dotenv/config";
+
 
 import express, { Request, Response } from "express";
 import cors from "cors";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "./prisma";
+import authRoutes from "./routes/auth";
+import { authenticateToken } from "./middleware/auth";
 
 const app = express();
-const prisma = new PrismaClient();
+
+
 
 const PORT = 3000;
 
 app.use(cors());
 app.use(express.json());
-
+app.use("/api/auth", authRoutes);
 // GET: Retrieve the top five leaderboard scores.
 app.get(
     "/api/leaderboard",
@@ -38,26 +41,44 @@ app.get(
 );
 
 // POST: Save a new player score.
+
 app.post(
     "/api/leaderboard",
+    authenticateToken,
     async (req: Request, res: Response) => {
         try {
-            const { name, score } = req.body;
+            const userId = req.userId;
+
+            if (typeof userId !== "number") {
+                res.status(401).json({
+                    message: "Authentication required."
+                });
+                return;
+            }
+
+            const user = await prisma.user.findUnique({
+                where: { id: userId }
+            });
+
+            if (!user) {
+                res.status(404).json({
+                    message: "User account not found."
+                });
+                return;
+            }
+
+            const { score } = req.body;
 
             if (
-                typeof name !== "string" ||
                 typeof score !== "number" ||
                 !Number.isSafeInteger(score) ||
                 score < 0
             ) {
                 res.status(400).json({
-                    message: "Invalid player name or score."
+                    message: "Invalid score."
                 });
                 return;
             }
-
-            const cleanName =
-                name.trim().slice(0, 20) || "Player";
 
             const previousBest =
                 await prisma.leaderboard.findFirst({
@@ -67,7 +88,7 @@ app.post(
             const newEntry =
                 await prisma.leaderboard.create({
                     data: {
-                        name: cleanName,
+                        name: user.username,
                         score
                     }
                 });
